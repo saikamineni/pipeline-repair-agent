@@ -12,7 +12,7 @@ def transform(df):
     df["order_month"] = df["order_date"].dt.strftime("%Y-%m")
     out = df.groupby(["customer_id", "order_month"], as_index=False).agg(
         total_revenue=("amount", "sum"),
-        order_count=("amount", "size"),
+        order_count=("amount", "count"),
     )
     out["total_revenue"] = out["total_revenue"].astype(float).round(2)
     out["order_count"] = out["order_count"].astype(int)
