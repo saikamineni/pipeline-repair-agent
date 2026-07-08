@@ -4,10 +4,18 @@ import anthropic
 from agent.tools import TOOLS, TOOL_IMPLS
 from agent.prompts import SYSTEM
 
-client = anthropic.Anthropic()
+import os
+from dotenv import load_dotenv   # pip install python-dotenv
+
+
+load_dotenv()
+client = anthropic.Anthropic(
+    api_key=os.environ["PIPELINE_AGENT_ANTHROPIC_KEY"])
 MODEL = "claude-sonnet-4-6"
 
 MAX_TOOL_RESULT = 6000
+
+
 
 
 def run_agent(task: str, max_iters: int = 25):
