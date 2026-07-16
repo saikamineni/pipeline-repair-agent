@@ -85,7 +85,7 @@ ord_0082,cust_3,261.83,EUR,2025-12-16,SHIPPED
 ord_0083,cust_16,161.38,USD,2025-07-22,cancelled
 ord_0084,cust_12,387.15,USD,2025-03-15,SHIPPED
 ord_0085,cust_14,332.52,INR,2025-11-03,placed
-ord_0086,cust_1,189.96,EUR,2025-10-20,cancelled
+ord_0086,cust_1,$189.96,EUR,2025-10-20,cancelled
 ord_0087,cust_6,51.76,INR,2025-12-28,placed
 ord_0088,cust_15,374.66,USD,2025-08-26,placed
 ord_0089,cust_16,134.92,INR,2025-02-21,shipped
@@ -94,7 +94,7 @@ ord_0091,cust_16,124.28,USD,2025-06-13,cancelled
 ord_0092,cust_16,65.77,USD,2025-11-04,SHIPPED
 ord_0093,cust_7,416.4,EUR,2025-05-24,placed
 ord_0094,cust_17,80.88,USD,2025-04-30,cancelled
-ord_0095,cust_5,93.74,USD,2025-01-30,shipped
+ord_0095,cust_5,$93.74,USD,2025-01-30,shipped
 ord_0096,cust_4,301.69,INR,2025-11-01,SHIPPED
 ord_0097,cust_13,437.91,USD,2025-10-03,shipped
 ord_0098,cust_12,102.24,USD,2025-01-16,shipped
@@ -124,7 +124,7 @@ ord_0121,cust_13,246.85,USD,2025-01-31,SHIPPED
 ord_0122,cust_13,333.12,USD,2025-04-09,shipped
 ord_0123,cust_9,478.03,USD,2025-03-30,cancelled
 ord_0124,cust_17,146.79,EUR,2025-11-03,cancelled
-ord_0125,cust_11,462.78,INR,2025-11-04,placed
+ord_0125,cust_11,$462.78,INR,2025-11-04,placed
 ord_0126,cust_1,17.31,USD,2025-11-08,shipped
 ord_0127,cust_15,279.82,INR,2025-08-21,placed
 ord_0128,cust_11,318.82,USD,2025-07-23,shipped
@@ -152,7 +152,7 @@ ord_0149,cust_1,215.81,EUR,2025-11-07,shipped
 ord_0150,cust_17,327.71,USD,2025-05-16,placed
 ord_0151,cust_5,434.41,INR,2025-07-04,SHIPPED
 ord_0152,cust_18,229.68,EUR,2025-06-07,SHIPPED
-ord_0153,cust_5,127.68,USD,2025-11-28,cancelled
+ord_0153,cust_5,$127.68,USD,2025-11-28,cancelled
 ord_0154,cust_8,122.15,USD,2025-04-22,placed
 ord_0155,cust_13,374.28,USD,2025-08-03,SHIPPED
 ord_0156,cust_2,409.2,INR,2025-02-13,SHIPPED
@@ -170,7 +170,7 @@ ord_0167,cust_3,81.04,INR,2025-05-26,SHIPPED
 ord_0168,cust_6,62.17,USD,2025-12-31,cancelled
 ord_0169,cust_0,15.47,USD,2025-12-01,shipped
 ord_0170,cust_2,32.42,USD,2025-08-18,cancelled
-ord_0171,cust_1,91.45,USD,2025-08-19,SHIPPED
+ord_0171,cust_1,$91.45,USD,2025-08-19,SHIPPED
 ord_0172,cust_15,31.42,USD,2025-05-23,SHIPPED
 ord_0173,cust_14,297.62,USD,2025-03-06,SHIPPED
 ord_0174,,341.95,USD,2025-01-04,cancelled

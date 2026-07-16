@@ -14,7 +14,7 @@ def _ignore_duckdb(dir_, names):
 
 
 def make_fixture(name):
-    dest = FIXTURES_DIR / name
+    dest = FIXTURES_DIR / name / "repo"
     if dest.exists():
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
@@ -28,7 +28,7 @@ def make_fixture(name):
 def main():
     for name in sys.argv[1:]:
         make_fixture(name)
-        print(f"created {FIXTURES_DIR / name}")
+        print(f"created {FIXTURES_DIR / name / 'repo'}")
 
 
 if __name__ == "__main__":

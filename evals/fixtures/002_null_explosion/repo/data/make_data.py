@@ -10,5 +10,5 @@ df = pd.DataFrame({
     "order_date":  pd.to_datetime("2025-01-01") + pd.to_timedelta(rng.integers(0, 365, n), "D"),
     "status":      rng.choice(["placed", "SHIPPED", "shipped", "cancelled"], n),  # dirty case on purpose
 })
-df.loc[rng.choice(n, 8, replace=False), "customer_id"] = None  # dirty nulls on purpose
+df.loc[rng.choice(n, 60, replace=False), "customer_id"] = None  # dirty nulls on purpose
 df.to_csv("data/orders.csv", index=False)

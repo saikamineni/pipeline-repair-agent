@@ -1,0 +1,7 @@
+{
+  "bug_type": "schema_drift",
+  "description": "pipeline/schema.py's RAW_ORDERS schema no longer matches data/orders.csv: it requires a new 'channel' column that doesn't exist in the raw data, and expects 'amount' to be int instead of float. transform() fails at RAW_ORDERS.validate() with a pandera SchemaError.",
+  "planted_in": "repo/pipeline/schema.py",
+  "expected_failure": "pandera.errors.SchemaError: column 'channel' not in dataframe",
+  "fix_hint": "Align RAW_ORDERS in pipeline/schema.py back to the actual columns/types produced by data/orders.csv (drop 'channel', restore 'amount' to float)."
+}

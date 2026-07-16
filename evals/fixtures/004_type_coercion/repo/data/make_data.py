@@ -11,4 +11,9 @@ df = pd.DataFrame({
     "status":      rng.choice(["placed", "SHIPPED", "shipped", "cancelled"], n),  # dirty case on purpose
 })
 df.loc[rng.choice(n, 8, replace=False), "customer_id"] = None  # dirty nulls on purpose
+
+df["amount"] = df["amount"].astype(object)
+dirty_idx = rng.choice(n, 5, replace=False)
+df.loc[dirty_idx, "amount"] = df.loc[dirty_idx, "amount"].apply(lambda v: f"${v:.2f}")  # dirty currency-prefixed amounts on purpose
+
 df.to_csv("data/orders.csv", index=False)

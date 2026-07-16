@@ -4,10 +4,11 @@ from pandera.pandas import Column, Check
 RAW_ORDERS = pa.DataFrameSchema({
     "order_id":    Column(str, unique=True),
     "customer_id": Column(str, nullable=True),   # raw data is dirty on purpose
-    "amount":      Column(float, Check.ge(0)),
+    "amount":      Column(int, Check.ge(0)),
     "currency":    Column(str, Check.isin(["USD", "EUR", "INR"])),
     "order_date":  Column(pa.DateTime),
     "status":      Column(str, Check.isin(["placed", "shipped", "cancelled"])),
+    "channel":     Column(str, Check.isin(["web", "app", "phone"])),
 })
 
 MONTHLY_REVENUE = pa.DataFrameSchema({

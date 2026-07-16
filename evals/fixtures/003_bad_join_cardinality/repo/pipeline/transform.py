@@ -1,4 +1,5 @@
 import pandas as pd
+from pipeline.extract import extract_customers
 from pipeline.schema import RAW_ORDERS, MONTHLY_REVENUE
 
 
@@ -9,6 +10,7 @@ def transform(df):
     RAW_ORDERS.validate(df)                           # raw contract holds post-normalize
 
     df = df.dropna(subset=["customer_id"])            # output requires non-null customer
+    df = df.merge(extract_customers(), on="customer_id", how="left")  # enrich with region
     df["order_month"] = df["order_date"].dt.strftime("%Y-%m")
     out = df.groupby(["customer_id", "order_month"], as_index=False).agg(
         total_revenue=("amount", "sum"),

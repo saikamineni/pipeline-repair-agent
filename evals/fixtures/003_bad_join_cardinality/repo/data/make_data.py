@@ -12,3 +12,10 @@ df = pd.DataFrame({
 })
 df.loc[rng.choice(n, 8, replace=False), "customer_id"] = None  # dirty nulls on purpose
 df.to_csv("data/orders.csv", index=False)
+
+customers = pd.DataFrame({
+    "customer_id": [f"cust_{i}" for i in range(20)],
+    "region":      rng.choice(["AMER", "EU", "APAC"], 20),
+})
+customers = pd.concat([customers, customers.iloc[[0]]], ignore_index=True)  # dirty duplicate dimension row on purpose
+customers.to_csv("data/customers.csv", index=False)

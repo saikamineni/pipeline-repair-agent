@@ -1,0 +1,7 @@
+{
+  "bug_type": "window_off_by_one",
+  "description": "pipeline/transform.py buckets orders into the wrong calendar month: it computes order_month as (order_date.dt.to_period('M') + 1), i.e. every order is bucketed into the NEXT month instead of its own. Because pandas Period arithmetic correctly rolls the year over, December orders specifically land in January of the following year (e.g. 2025-12 orders become 2026-01), while every other month is shifted forward by one as well (e.g. what appears in the '2025-12' bucket is actually November orders).",
+  "planted_in": "repo/pipeline/transform.py (code bug, not data — deviates from the repo's usual 'dirt lives in the data' convention on purpose, since off-by-one bucketing is inherently a logic bug)",
+  "expected_failure": "tests/test_pipeline.py::test_known_aggregate fails with IndexError: cust_0's pinned Dec-2025 aggregate (3, 423.10) can no longer be found under order_month == '2025-12' in pipeline_output, because it was relabeled '2026-01'",
+  "fix_hint": "Bucket each order into its own month, not the next one: df[\"order_month\"] = df[\"order_date\"].dt.strftime(\"%Y-%m\") (or df.dt.to_period(\"M\").astype(str) without the '+ 1')."
+}
