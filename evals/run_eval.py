@@ -6,6 +6,7 @@ from agent.loop import run_agent
 
 FIXTURES = pathlib.Path("evals/fixtures")
 RUNS = pathlib.Path("evals/results")
+HISTORY = RUNS / "history.jsonl"
 
 def score_fixture(fx: pathlib.Path, run_dir: pathlib.Path) -> dict:
     work = pathlib.Path("/tmp/eval") / fx.name          # per-fixture, no clobbering
@@ -46,9 +47,28 @@ def _serialize(messages):
         return str(c)
     return [{"role": m["role"], "content": coerce_content(m["content"])} for m in messages]
 
+def record_history(run_dir: pathlib.Path, rows: list, note: str) -> dict:
+    resolved = sum(r["resolved"] for r in rows)
+    total = len(rows)
+    entry = {
+        "run": run_dir.name,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "note": note,
+        "resolved": resolved,
+        "total": total,
+        "resolution_rate": round(resolved / total, 4),
+    }
+    with HISTORY.open("a") as f:
+        f.write(json.dumps(entry) + "\n")
+    return entry
+
 if __name__ == "__main__":
+    note = sys.argv[1] if len(sys.argv) > 1 else ""   # e.g. python evals/run_eval.py "fixed run_tests cwd scoping"
     run_dir = RUNS / time.strftime("%Y%m%d_%H%M%S")   # second-resolution: no collisions
     run_dir.mkdir(parents=True)
     rows = [score_fixture(fx, run_dir) for fx in sorted(FIXTURES.iterdir())]
     (run_dir / "summary.json").write_text(json.dumps(rows, indent=2))
-    print(f"resolution: {sum(r['resolved'] for r in rows)}/{len(rows)} → {run_dir}")
+    entry = record_history(run_dir, rows, note)
+    prior = HISTORY.read_text().splitlines()[:-1]   # exclude the entry we just wrote
+    trend = f" (prev: {json.loads(prior[-1])['resolution_rate']:.0%})" if prior else ""
+    print(f"resolution: {entry['resolved']}/{entry['total']} ({entry['resolution_rate']:.0%}){trend} → {run_dir}")
