@@ -24,10 +24,10 @@ def run_agent(task: str, max_iters: int = 25):
         set_cache_breakpoint(messages)
         resp = client.messages.create(model=MODEL, max_tokens=2000, system=[{"type" : "text", "text": SYSTEM, "cache_control": {"type": "ephemeral"}}], tools=TOOLS, messages=messages)
         # time.sleep(3)
-        print(resp.usage)
+        # print(resp.usage)
         messages.append({"role": "assistant", "content": resp.content})
         if resp.stop_reason != "tool_use":
-            return {"done": True, "iters": i+1, "meesages": messages}
+            return {"done": True, "iters": i+1, "messages": messages}
         results = []
         for block in resp.content:
             # if block.type == "text" and block.text.strip():

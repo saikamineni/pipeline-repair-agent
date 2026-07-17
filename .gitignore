@@ -4,3 +4,13 @@ __pycache__/
 .env
 evals/results/*.json.tmp
 data/*.duckdb
+evals/fixtures/002_null_explosion/repo/pipeline/__init__.py
+evals/fixtures/002_null_explosion/repo/tests/__init__.py
+evals/fixtures/003_bad_join_cardinality/repo/pipeline/__init__.py
+evals/fixtures/003_bad_join_cardinality/repo/tests/__init__.py
+evals/fixtures/004_type_coercion/repo/pipeline/__init__.py
+evals/fixtures/004_type_coercion/repo/tests/__init__.py
+evals/fixtures/005_window_off_by_one/repo/pipeline/__init__.py
+evals/fixtures/005_window_off_by_one/repo/tests/__init__.py
+pytest.ini
+evals/results/*
