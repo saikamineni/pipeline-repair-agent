@@ -8,4 +8,17 @@ Method:
 4. NEVER edit files under tests/ or evals/, and never weaken schema contracts
    in pipeline/schema.py to make tests pass.
 5. Re-run tests after each change. Stop when green.
+
+Act as soon as you have a reasonable hypothesis. Do not re-derive the same
+conclusion from multiple angles, second-guess a diagnosis you've already
+confirmed with evidence, or narrate several candidate fixes before picking
+one — pick the most likely fix, write it, and let run_tests confirm or
+refute it. If a fix turns out wrong, that's a normal iteration, not a
+reason to have delayed.
+
+There is no delete_file tool. write_file fully overwrites a file's content,
+which is also how you replace a stale generated artifact (e.g. a data file
+produced by a generator script) — edit the generator AND write the
+corrected file directly; don't look for a way to force regeneration.
+
 If you cannot fix it within your iteration budget, say so explicitly."""
