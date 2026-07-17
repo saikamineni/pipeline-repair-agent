@@ -1,6 +1,7 @@
 import subprocess, pathlib
 
 
+CWD = "."  # scopes run_tests(); caller sets this before invoking run_agent
 EXCLUDE = {".venv", "__pycache__", ".git", "node_modules", ".pytest_cache"}
 def read_file(path: str) -> str:
     text = pathlib.Path(path).read_text()
@@ -23,7 +24,7 @@ def grep(pattern: str, directory: str = ".") -> str:
     return r.stdout[:  1500] or "no matches"
 
 def run_tests() -> str:
-    r = subprocess.run(["pytest", "-x", "-q"], capture_output=True, text=True)
+    r = subprocess.run(["pytest", "-x", "-q"], cwd=CWD, capture_output=True, text=True)
     return (r.stdout + r.stderr)[-1500:]
 
 TOOL_IMPLS = {f.__name__: f for f in [read_file, write_file, list_files, grep, run_tests]}

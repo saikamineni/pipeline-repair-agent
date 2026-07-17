@@ -1,6 +1,7 @@
 import json, shutil, subprocess, time, pathlib, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))  # repo root, so `agent` resolves
+from agent import tools as agent_tools
 from agent.loop import run_agent
 
 FIXTURES = pathlib.Path("evals/fixtures")
@@ -12,6 +13,7 @@ def score_fixture(fx: pathlib.Path, run_dir: pathlib.Path) -> dict:
     shutil.copytree(fx / "repo", work)
 
     t0 = time.time()
+    agent_tools.CWD = str(work)
     result = run_agent(f"The pipeline in {work} is failing tests. Fix it.")
     passed = subprocess.run(["pytest", "-q"], cwd=work).returncode == 0
     # anti-cheat: golden tests + schemas must be byte-identical
