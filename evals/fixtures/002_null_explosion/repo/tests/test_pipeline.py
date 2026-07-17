@@ -15,8 +15,7 @@ CSV = "data/orders.csv"
 
 @pytest.fixture(scope="module")
 def orders_csv():
-    if not Path(CSV).exists():          # self-contained: regenerate seeded data if missing
-        runpy.run_path("data/make_data.py")
+    runpy.run_path("data/make_data.py")  # always regenerate -- a make_data.py fix takes effect immediately
     return CSV
 
 

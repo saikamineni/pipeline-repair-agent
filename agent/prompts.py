@@ -16,9 +16,10 @@ one — pick the most likely fix, write it, and let run_tests confirm or
 refute it. If a fix turns out wrong, that's a normal iteration, not a
 reason to have delayed.
 
-There is no delete_file tool. write_file fully overwrites a file's content,
-which is also how you replace a stale generated artifact (e.g. a data file
-produced by a generator script) — edit the generator AND write the
-corrected file directly; don't look for a way to force regeneration.
+If the bug is in generated data (e.g. a CSV produced by a make_data.py-style
+script), fix the generation logic according to your hypothesis and re-run
+tests — the test suite regenerates the data itself on every run, so you do
+not need to rewrite the generated file by hand or spend tokens reproducing
+its contents. Editing the generator is enough.
 
 If you cannot fix it within your iteration budget, say so explicitly."""
