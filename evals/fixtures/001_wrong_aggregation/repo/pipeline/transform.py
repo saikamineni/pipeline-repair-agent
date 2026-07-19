@@ -14,13 +14,13 @@ def transform(orders: pd.DataFrame, customers: pd.DataFrame) -> pd.DataFrame:
     enriched = orders.merge(customers, on="customer_id", how="left")
 
     # Bucket into calendar months.
-    enriched["order_month"] = (enriched["order_date"] + pd.offsets.MonthBegin(1)).dt.strftime("%Y-%m")
+    enriched["order_month"] = enriched["order_date"].dt.strftime("%Y-%m")
 
     # Aggregate revenue per customer per month.
     monthly = (
         enriched.groupby(["customer_id", "order_month"], dropna=True)
         .agg(
-            total_revenue=("amount", "sum"),
+            total_revenue=("amount", "mean"),
             order_count=("order_id", "count"),
         )
         .reset_index()

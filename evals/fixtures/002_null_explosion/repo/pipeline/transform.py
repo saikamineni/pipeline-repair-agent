@@ -1,19 +1,30 @@
+"""Transform stage: join orders to customers, aggregate to monthly revenue.
+
+MUTABLE in fixtures. Most logic bugs (null handling, join cardinality,
+window boundaries, aggregation) are injected here.
+"""
 import pandas as pd
-from pipeline.schema import RAW_ORDERS, MONTHLY_REVENUE
 
 
-def transform(df):
-    df = df.copy()
-    df["order_date"] = pd.to_datetime(df["order_date"])
-    df["status"] = df["status"].str.lower()          # normalize dirty mixed case
-    RAW_ORDERS.validate(df)                           # raw contract holds post-normalize
+def transform(orders: pd.DataFrame, customers: pd.DataFrame) -> pd.DataFrame:
+    orders = orders.copy() 
 
-    df = df.dropna(subset=["customer_id"])            # output requires non-null customer
-    df["order_month"] = df["order_date"].dt.strftime("%Y-%m")
-    out = df.groupby(["customer_id", "order_month"], as_index=False).agg(
-        total_revenue=("amount", "sum"),
-        order_count=("amount", "count"),
+    # Attach region via a left join on the unique customer key.
+    enriched = orders.merge(customers, on="customer_id", how="left")
+
+    # Bucket into calendar months.
+    enriched["order_month"] = enriched["order_date"].dt.strftime("%Y-%m")
+
+    # Aggregate revenue per customer per month.
+    monthly = (
+        enriched.groupby(["customer_id", "order_month"], dropna=False)
+        .agg(
+            total_revenue=("amount", "sum"),
+            order_count=("order_id", "count"),
+        )
+        .reset_index()
     )
-    out["total_revenue"] = out["total_revenue"].astype(float).round(2)
-    out["order_count"] = out["order_count"].astype(int)
-    return MONTHLY_REVENUE.validate(out)
+
+    monthly["total_revenue"] = monthly["total_revenue"].round(2)
+    monthly["order_count"] = monthly["order_count"].astype(int)
+    return monthly

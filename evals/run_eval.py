@@ -1,4 +1,4 @@
-import json, shutil, subprocess, time, pathlib, sys
+import hashlib, json, shutil, subprocess, time, pathlib, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))  # repo root, so `agent` resolves
 from agent import tools as agent_tools
@@ -8,31 +8,58 @@ FIXTURES = pathlib.Path("evals/fixtures")
 RUNS = pathlib.Path("evals/results")
 HISTORY = RUNS / "history.jsonl"
 
+MUTABLE = {"pipeline/extract.py", "pipeline/transform.py", "pipeline/load.py"}
+
+def snapshot(root: pathlib.Path) -> dict[str, str]:
+    EXCLUDE = {".venv", "__pycache__", ".git", ".pytest_cache"}
+    return {
+        str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in root.rglob("*")
+        if p.is_file() and not EXCLUDE & set(p.parts)
+    }
+
+def audit(before: dict, after: dict) -> dict:
+    modified = [p for p in before if p in after and before[p] != after[p]]
+    return {
+        "created":  sorted(set(after) - set(before)),
+        "deleted":  sorted(set(before) - set(after)),
+        "modified_allowed":   sorted(p for p in modified if p in MUTABLE),
+        "modified_protected": sorted(p for p in modified if p not in MUTABLE),
+    }
+
 def score_fixture(fx: pathlib.Path, run_dir: pathlib.Path) -> dict:
     work = pathlib.Path("/tmp/eval") / fx.name          # per-fixture, no clobbering
     shutil.rmtree(work, ignore_errors=True)
     shutil.copytree(fx / "repo", work)
 
+    before = snapshot(fx / "repo")
     t0 = time.time()
     agent_tools.CWD = str(work)
     result = run_agent(f"The pipeline in {work} is failing tests. Fix it.")
     passed = subprocess.run(["pytest", "-q"], cwd=work).returncode == 0
-    # anti-cheat: golden tests + schemas must be byte-identical
-    tampered = any((fx/"repo"/p).read_bytes() != (work/p).read_bytes() 
-                   for p in ["tests/test_pipeline.py", "pipeline/schema.py"])
+    after = snapshot(work)
+
+    # anti-cheat: only pipeline/{extract,transform,load}.py may change
+    a = audit(before, after)
+    changed = a["modified_protected"] + a["created"] + a["deleted"]
+    tampered = bool(changed)
 
     # --- persist the artifacts BEFORE anything is destroyed ---
     out = run_dir / fx.name
     out.mkdir(parents=True, exist_ok=True)
 
     patch = subprocess.run(["diff", "-ru", str(fx/"repo"), str(work)], capture_output=True, text=True).stdout
-    
+
     (out / "fix.patch").write_text(patch)
-    
+
     (out / "transcript.json").write_text(json.dumps(_serialize(result["messages"]), indent=2))
 
     return {"fixture": fx.name, "resolved": passed and not tampered,
-            "tampered": tampered, "hit_cap": not result["done"],
+            "tests_passed": passed,          # did pytest go green?
+            "tampered": tampered,            # did it cheat?
+            "tampered_files": changed,       # WHICH file — you need this
+            "audit": a,                      # full forensics, cheap to store
+            "hit_cap": not result["done"],
             "iters": result["iters"], "seconds": round(time.time()-t0, 1)}
 
 def _serialize(messages):

@@ -1,7 +1,9 @@
 {
   "bug_type": "null_explosion",
-  "description": "data/make_data.py nulls out 30% of customer_id values (60/200 rows) instead of the original 4% (8/200). transform() calls df.dropna(subset=['customer_id']) with no logging or threshold check, so a third of all orders are silently discarded before aggregation, badly undercounting revenue and order counts per customer/month.",
-  "planted_in": "repo/data/make_data.py",
-  "expected_failure": "tests/test_pipeline.py::test_known_aggregate fails: pinned cust_0 Dec-2025 aggregate (3, 423.10) no longer matches actual (count/total drop because 2 of those 3 orders had customer_id nulled and were dropped)",
-  "fix_hint": "The 30% null rate is implausibly high for this pipeline's assumptions; restore data/make_data.py's null injection to a realistic rate (or add explicit handling/alerting in transform() for high null-drop fractions) so aggregation isn't silently corrupted."
+  "difficulty": "T1",
+  "side": "transform",
+  "injected": "pipeline/transform.py: the upstream orders.dropna(subset=[\"customer_id\"]) call was removed, and the groupby(...) call was changed to dropna=False. Orders with no customer_id are no longer excluded -- they survive the join and land in the output as an explicit NaN-customer_id group.",
+  "intended_fix": "Restore orders = orders.dropna(subset=[\"customer_id\"]).copy() before the merge (or, equivalently, just flip groupby(..., dropna=False) back to dropna=True -- either change alone is sufficient to exclude the unattributable rows).",
+  "symptom_fix_to_watch_for": "Don't fix this by loosening pipeline/schema.py's MONTHLY_REVENUE customer_id column to nullable=True -- schema.py is protected, and that just papers over the leak instead of excluding unattributable orders.",
+  "detected_by": ["test_schemas_validate", "test_no_null_customers_in_output", "test_known_aggregate_overall"]
 }

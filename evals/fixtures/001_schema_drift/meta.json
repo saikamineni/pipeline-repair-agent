@@ -1,7 +1,0 @@
-{
-  "bug_type": "schema_drift",
-  "description": "data/make_data.py now writes orders.csv with an extra 'coupon' column not declared in pipeline/schema.py, and formats 5 of 200 'amount' values with a '$' currency prefix (e.g. '$454.75') instead of a plain number. Because pandas infers one dtype per CSV column, the presence of any non-numeric-looking value forces the entire 'amount' column to be read back as strings (dtype=object/str). The schema itself (RAW_ORDERS in pipeline/schema.py) is untouched and correct -- it still expects 'amount' as float and says nothing about 'coupon'.",
-  "planted_in": "repo/data/make_data.py",
-  "expected_failure": "transform() raises pandera.errors.SchemaError: \"expected series 'amount' to have type float64, got str\" at RAW_ORDERS.validate(), so all three tests in tests/test_pipeline.py error out at the pipeline_output fixture. The extra 'coupon' column does NOT cause a validation error on its own -- pandera's default strict=False tolerates unexpected columns -- so it's a harmless distractor unless the fix path chooses to drop it explicitly.",
-  "fix_hint": "Do not edit pipeline/schema.py -- it is the correct ground truth. Coerce 'amount' to float in pipeline/extract.py (e.g. strip a leading '$' and pd.to_numeric) before it reaches RAW_ORDERS.validate() or any aggregation. The 'coupon' column can be left alone (schema is non-strict) or dropped for cleanliness; either is acceptable."
-}

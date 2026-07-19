@@ -1,7 +1,9 @@
 {
   "bug_type": "bad_join_cardinality",
-  "description": "data/make_data.py's customers dimension table (data/customers.csv) has a duplicate row for customer_id 'cust_0'. transform() left-joins orders onto this dimension table (via pipeline.extract.extract_customers) to enrich with region before aggregating. Because the join key isn't unique in the dimension table, every order row for cust_0 is duplicated (fanned out) by the merge, silently doubling its aggregated total_revenue and order_count.",
-  "planted_in": "repo/data/make_data.py (customers table), joined in repo/pipeline/transform.py",
-  "expected_failure": "tests/test_pipeline.py::test_known_aggregate fails: pinned cust_0 Dec-2025 aggregate (3, 423.10) becomes (6, 846.20) — exactly doubled by the one duplicated dimension row",
-  "fix_hint": "Deduplicate data/customers.csv on customer_id (or assert/validate uniqueness before the merge in transform.py) so the region join is one-to-one and doesn't fan out matching order rows."
+  "difficulty": "T2",
+  "side": "transform",
+  "injected": "pipeline/transform.py: after the legitimate 1:1 orders-to-customers merge on customer_id, an extra merge is added -- enriched.merge(customers[[\"region\"]], on=\"region\", how=\"left\") -- joining on the non-unique 'region' column. Since multiple customers share a region, every order row fans out by however many customers are in that region.",
+  "intended_fix": "Delete the extra region_counts/second merge entirely; the first merge (on customer_id) already attaches everything transform() needs.",
+  "symptom_fix_to_watch_for": "This fixture used to be about a duplicate row in the customers dimension table -- don't reach for .drop_duplicates() on the customers input as a reflex. Deduping customers does nothing here; the fan-out comes from the second, unnecessary self-merge on 'region', which needs to be removed, not deduped around.",
+  "detected_by": ["test_known_aggregate_overall", "test_known_aggregate_customer", "test_known_aggregate_cell"]
 }

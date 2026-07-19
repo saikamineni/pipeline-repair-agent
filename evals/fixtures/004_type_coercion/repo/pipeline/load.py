@@ -1,8 +1,16 @@
-import duckdb
+"""Load stage: validate the final frame and write it out.
+
+MUTABLE in fixtures, though bugs here are rarer.
+"""
+from pathlib import Path
+import pandas as pd
+from pipeline.schema import MONTHLY_REVENUE
+
+OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
-def load(df, db_path="data/warehouse.duckdb", table="monthly_revenue"):
-    con = duckdb.connect(db_path)
-    con.execute(f"CREATE OR REPLACE TABLE {table} AS SELECT * FROM df")
-    con.close()
-    return db_path
+def load(monthly: pd.DataFrame, path: Path | str | None = None) -> pd.DataFrame:
+    validated = MONTHLY_REVENUE.validate(monthly)
+    path = Path(path) if path else OUTPUT_DIR / "monthly_revenue.csv"
+    validated.to_csv(path, index=False)
+    return validated

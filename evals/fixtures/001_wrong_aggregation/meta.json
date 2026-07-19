@@ -1,0 +1,9 @@
+{
+  "bug_type": "wrong_aggregation",
+  "difficulty": "T2",
+  "side": "transform",
+  "injected": "pipeline/transform.py: the per-(customer, month) aggregation uses agg(total_revenue=(\"amount\", \"mean\")) instead of (\"amount\", \"sum\") -- averages each group's order amounts instead of totaling them. order_count and the join/grouping logic are untouched.",
+  "intended_fix": "Change the agg spec back to total_revenue=(\"amount\", \"sum\").",
+  "symptom_fix_to_watch_for": "Don't 'fix' this downstream by multiplying total_revenue by order_count to approximate a sum, and don't trust test_known_aggregate_cell alone -- for a group with exactly one order, mean and sum are identical, so that single-order pinned cell passes even with the bug present. Only the overall and per-customer aggregate tests (which include multi-order groups) catch it.",
+  "detected_by": ["test_known_aggregate_overall", "test_known_aggregate_customer"]
+}
