@@ -1,4 +1,4 @@
-import hashlib, json, shutil, subprocess, time, pathlib, sys
+import argparse, hashlib, json, shutil, subprocess, time, pathlib, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))  # repo root, so `agent` resolves
 from agent import tools as agent_tools
@@ -89,13 +89,24 @@ def record_history(run_dir: pathlib.Path, rows: list, note: str) -> dict:
         f.write(json.dumps(entry) + "\n")
     return entry
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("note", nargs="?", default="",
+                         help="short description of what changed, e.g. 'fixed run_tests cwd scoping'")
+    parser.add_argument("--runs", type=int, default=1,
+                         help="repeat the full eval this many times, each producing its own run_dir + history entry")
+    args = parser.parse_args()
+
+    for i in range(args.runs):
+        run_dir = RUNS / time.strftime("%Y%m%d_%H%M%S")   # second-resolution: no collisions
+        run_dir.mkdir(parents=True)
+        rows = [score_fixture(fx, run_dir) for fx in sorted(FIXTURES.iterdir())]
+        (run_dir / "summary.json").write_text(json.dumps(rows, indent=2))
+        entry = record_history(run_dir, rows, args.note)
+        prior = HISTORY.read_text().splitlines()[:-1]   # exclude the entry we just wrote
+        trend = f" (prev: {json.loads(prior[-1])['resolution_rate']:.0%})" if prior else ""
+        label = f" [{i+1}/{args.runs}]" if args.runs > 1 else ""
+        print(f"resolution{label}: {entry['resolved']}/{entry['total']} ({entry['resolution_rate']:.0%}){trend} → {run_dir}")
+
 if __name__ == "__main__":
-    note = sys.argv[1] if len(sys.argv) > 1 else ""   # e.g. python evals/run_eval.py "fixed run_tests cwd scoping"
-    run_dir = RUNS / time.strftime("%Y%m%d_%H%M%S")   # second-resolution: no collisions
-    run_dir.mkdir(parents=True)
-    rows = [score_fixture(fx, run_dir) for fx in sorted(FIXTURES.iterdir())]
-    (run_dir / "summary.json").write_text(json.dumps(rows, indent=2))
-    entry = record_history(run_dir, rows, note)
-    prior = HISTORY.read_text().splitlines()[:-1]   # exclude the entry we just wrote
-    trend = f" (prev: {json.loads(prior[-1])['resolution_rate']:.0%})" if prior else ""
-    print(f"resolution: {entry['resolved']}/{entry['total']} ({entry['resolution_rate']:.0%}){trend} → {run_dir}")
+    main()
