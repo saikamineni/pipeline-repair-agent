@@ -58,3 +58,7 @@ def test_known_aggregate_cell(pipeline_output):
     assert len(cell) == 1
     assert round(cell["total_revenue"].iloc[0], 2) == 86.06
     assert int(cell["order_count"].iloc[0]) == 1
+
+def test_output_grain(pipeline_output):
+    # grain is (customer, month); grain bugs collapse this
+    assert len(pipeline_output) == 112
