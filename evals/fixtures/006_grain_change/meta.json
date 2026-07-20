@@ -1,0 +1,9 @@
+{
+  "bug_type": "grain_change",
+  "difficulty": "T3",
+  "side": ["extract", "transform"],
+  "injected": "Two independent changes, both required together to explain the failure: (1) pipeline/extract.py truncates every order_date to Jan 1 of its year via .dt.to_period(\"Y\").dt.to_timestamp() before transform ever sees it; (2) pipeline/transform.py buckets with .dt.strftime(\"%Y\") instead of \"%Y-%m\". Fixing either one alone still fails -- extract.py already destroyed the month info, or transform.py still collapses whatever date it's given.",
+  "intended_fix": "Fix both: in extract.py, drop the .dt.to_period(\"Y\").dt.to_timestamp() truncation and keep df[\"order_date\"] = pd.to_datetime(df[\"order_date\"]); in transform.py, change the strftime format back to \"%Y-%m\".",
+  "symptom_fix_to_watch_for": "Fixing only transform.py's format string looks like progress -- order_month values change shape (e.g. all become \"2025-01\") -- but test_output_grain still fails, because extract.py already collapsed every date to Jan 1 of its year; there's no month information left to format correctly. Don't stop after the first fix just because the output 'looks' different; both files have to change before row count reaches 112.",
+  "detected_by": ["test_known_aggregate_cell", "test_output_grain"]
+}

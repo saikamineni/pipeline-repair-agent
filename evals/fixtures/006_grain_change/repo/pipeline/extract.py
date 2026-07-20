@@ -12,7 +12,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 def extract_orders(path: Path | str | None = None) -> pd.DataFrame:
     path = Path(path) if path else DATA_DIR / "orders.csv"
     df = pd.read_csv(path, dtype={"order_id": str, "customer_id": str})
-    df["order_date"] = pd.to_datetime(df["order_date"])
+    df["order_date"] = pd.to_datetime(df["order_date"]).dt.to_period("Y").dt.to_timestamp()
     df["amount"] = df["amount"].astype(float)
     return df
 
